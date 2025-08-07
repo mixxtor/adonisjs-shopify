@@ -1,0 +1,262 @@
+# AdonisJS Shopify Package
+
+A comprehensive Shopify integration package for AdonisJS with full TypeScript support and type inference for REST resources.
+
+## Installation
+
+```bash
+npm install @mixxtor/adonisjs-shopify
+```
+
+## Setup
+
+### 1. Configure the Package
+
+First, add the package to your AdonisJS project:
+
+```bash
+node ace configure @mixxtor/adonisjs-shopify
+```
+
+### 2. Environment Variables
+
+Add your Shopify app credentials to `.env`:
+
+```env
+SHOPIFY_API_KEY=your_api_key
+SHOPIFY_API_SECRET=your_api_secret
+SHOPIFY_API_VERSION=2025-01
+SHOPIFY_HOST_NAME=your-app-domain.com
+SHOPIFY_SCOPES=read_products,write_products,read_orders
+```
+
+### 3. Provider Registration
+
+The package provider should be automatically registered in `adonisrc.ts`:
+
+```typescript
+// adonisrc.ts
+export default defineConfig({
+  providers: [
+    // ... other providers
+    () => import('@mixxtor/adonisjs-shopify/providers/shopify_provider')
+  ]
+})
+```
+
+
+### 4. Create Configuration File
+
+Create `config/shopify.ts`:
+
+```typescript
+import { defineConfig } from '@mixxtor/adonisjs-shopify'
+import { RestResources } from '@shopify/shopify-api/rest/admin/2025-07'
+import env from '#start/env'
+
+// Extend the container types for proper REST resource type inference
+declare module '@mixxtor/adonisjs-shopify/types' {
+  interface ShopifyRestResources extends RestResources {}
+}
+
+const shopifyConfig = defineConfig({
+  api_key: env.get('SHOPIFY_API_KEY'),
+  api_secret: env.get('SHOPIFY_API_SECRET'),
+  api_version: env.get('SHOPIFY_API_VERSION', '2025-01'),
+  host_name: env.get('SHOPIFY_HOST_NAME'),
+  scopes: env.get('SHOPIFY_SCOPES', '').split(','),
+  is_embedded_app: true,
+  is_private_app: false,
+  // Add other Shopify configuration options as needed
+})
+
+export default shopifyConfig
+```
+
+### 5. Export Service (Optional)
+
+For easier access across your app, export the service in `start/service.ts`:
+
+```typescript
+import app from '@adonisjs/core/services/app'
+
+export const shopify = await app.container.make('shopify')
+```
+
+## Usage
+
+#### 1. Container-based Service (Recommended)
+
+```typescript
+// In your services/controllers
+import { inject } from '@adonisjs/core'
+import type { ShopifyService } from '@mixxtor/adonisjs-shopify/types'
+
+@inject()
+export default class ProductService {
+  constructor(private shopify: ShopifyService) {}
+
+  async getProducts(session: Session) {
+    // Full type inference for Product class
+    const products = await this.shopify.api.rest.Product.all({ session })
+    return products.data
+  }
+
+  async createProduct(session: Session, productData: any) {
+    const product = new this.shopify.api.rest.Product({ session })
+    product.title = productData.title
+    product.body_html = productData.description
+    
+    await product.save()
+    return product
+  }
+}
+```
+
+#### 2. Direct Service Import
+
+```typescript
+// Alternative: Import service directly
+import shopify from '@mixxtor/adonisjs-shopify/services/main'
+
+export default class ShopController {
+  async index({ session }: HttpContext) {
+    const products = await shopify.api.rest.Product.all({ 
+      session: session.shopifySession 
+    })
+    
+    return products.data
+  }
+}
+```
+
+#### 3. Factory Function Approach (Advanced)
+
+For more control over typing, you can use the factory function:
+
+```typescript
+import { createTypedShopify } from '@mixxtor/adonisjs-shopify'
+import { RestResources } from '@shopify/shopify-api/rest/admin/2025-07'
+import shopifyConfig from '#config/shopify'
+
+const typedShopify = createTypedShopify<RestResources>(shopifyConfig)
+
+// Now has full type inference
+const products = await typedShopify.api.rest.Product.all({
+  session: yourSession
+})
+```
+
+## Authentication
+
+### OAuth Flow
+
+```typescript
+import { inject } from '@adonisjs/core'
+import type { HttpContext } from '@adonisjs/core/http'
+
+@inject()
+export default class AuthController {
+  constructor(private shopify: ShopifyService) {}
+
+  async redirect({ request, response }: HttpContext) {
+    const shop = request.input('shop')
+    
+    const authUrl = await this.shopify.auth.begin({
+      shop,
+      callbackPath: '/auth/callback',
+      isOnline: false
+    })
+    
+    return response.redirect(authUrl)
+  }
+
+  async callback({ request, response }: HttpContext) {
+    const authResult = await this.shopify.auth.callback({
+      rawRequest: request.request,
+      rawResponse: response.response
+    })
+    
+    if (authResult.session) {
+      // Store session and redirect to app
+      return response.redirect('/dashboard')
+    }
+    
+    return response.badRequest('Authentication failed')
+  }
+}
+```
+
+## Webhooks
+
+```typescript
+import type { HttpContext } from '@adonisjs/core/http'
+
+export default class WebhookController {
+  async handle({ request, response }: HttpContext) {
+    try {
+      const isValid = await shopify.webhooks.validate({
+        rawBody: request.raw(),
+        rawRequest: request.request
+      })
+      
+      if (!isValid) {
+        return response.unauthorized()
+      }
+      
+      const topic = request.header('x-shopify-topic')
+      const payload = request.body()
+      
+      // Handle webhook based on topic
+      switch (topic) {
+        case 'orders/create':
+          await this.handleOrderCreate(payload)
+          break
+        case 'products/update':
+          await this.handleProductUpdate(payload)
+          break
+      }
+      
+      return response.ok()
+    } catch (error) {
+      return response.internalServerError()
+    }
+  }
+}
+```
+
+### Benefits
+
+- ✅ Full IntelliSense support for all Shopify REST resources
+- ✅ Type-safe API calls with proper parameter validation
+- ✅ Auto-completion for methods and properties
+- ✅ TypeScript error detection for invalid resources/methods
+- ✅ Built-in OAuth authentication flow
+- ✅ Webhook validation and handling
+- ✅ Session management
+
+### Supported REST Resources
+
+All resources from `@shopify/shopify-api/rest/admin/2025-07`:
+- `Product`, `Variant`, `Collection`
+- `Customer`, `Order`, `DraftOrder`
+- `Inventory`, `Location`, `FulfillmentService`
+- `Webhook`, `ScriptTag`, `Asset`
+- `Shop`, `Country`, `Province`
+- And 60+ more resources with full type support...
+
+## Configuration Options
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `api_key` | string | - | Your Shopify app's API key |
+| `api_secret` | string | - | Your Shopify app's API secret |
+| `api_version` | string | '2025-01' | Shopify API version |
+| `host_name` | string | - | Your app's host name |
+| `scopes` | string[] | [] | Required OAuth scopes |
+| `is_embedded_app` | boolean | true | Whether app is embedded |
+| `is_private_app` | boolean | false | Whether app is private |
+
+## License
+
+MIT

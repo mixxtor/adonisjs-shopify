@@ -9,9 +9,8 @@
 
 export { default as ShopifyProvider } from './providers/shopify_provider.js'
 export * as ShopifyService from './services/shopify.js'
-export { createTypedShopify } from './services/typed.js'
 export type { ShopifyConfig } from './src/types/index.js'
-export { defineConfig } from './src/config/define_config.js'
+export { defineConfig } from './src/define_config.js'
 export { Scope } from './src/scope.js'
 export { stubsRoot } from './stubs/main.js'
 export { configure } from './configure.js'

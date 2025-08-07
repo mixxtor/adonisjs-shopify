@@ -130,23 +130,6 @@ export default class ShopController {
 }
 ```
 
-#### 3. Factory Function Approach (Advanced)
-
-For more control over typing, you can use the factory function:
-
-```typescript
-import { createTypedShopify } from '@mixxtor/adonisjs-shopify'
-import { RestResources } from '@shopify/shopify-api/rest/admin/2025-07'
-import shopifyConfig from '#config/shopify'
-
-const typedShopify = createTypedShopify<RestResources>(shopifyConfig)
-
-// Now has full type inference
-const products = await typedShopify.api.rest.Product.all({
-  session: yourSession
-})
-```
-
 ## Authentication
 
 ### OAuth Flow

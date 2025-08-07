@@ -61,6 +61,33 @@ export type FutureFlagOptions = FutureFlags | undefined
 
 type TCustomConfig = {
   /**
+   * AdonisJS specific configuration
+   */
+  // adonisjs: {
+  //   /**
+  //    * The Lucid model to use for shopify store queries
+  //    */
+  //   model: () => Promise<{ default: Model }> | Model
+
+  //   /**
+  //    * Column mapping for the shopify stores table
+  //    */
+  //   columns?: {
+  //     /**
+  //      * Shopify store ID column
+  //      * @default 'id'
+  //      */
+  //     id: string
+
+  //     /**
+  //      * Shopify store domain column
+  //      * @default 'shopify_domain'
+  //      */
+  //     shopify_domain: string
+  //   }
+  // }
+
+  /**
    * Webhooks to be registered on Shopify.
    * Note that we have `rest` and `graphql` webhooks which are different topics & events' responses.
    */

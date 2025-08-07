@@ -1,5 +1,5 @@
 /*
- * @mixxtor/currencyx-shopify
+ * @mixxtor/adonisjs-shopify
  *
  * (c) Mixxtor
  *

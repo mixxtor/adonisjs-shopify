@@ -1,6 +1,6 @@
 {
   "name": "@mixxtor/adonisjs-shopify",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "AdonisJS provider for Shopify API integration",
   "engines": {
     "node": ">=20.6.0"

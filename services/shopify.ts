@@ -226,14 +226,14 @@ class ShopifyService<
        * @param {boolean} params.checkAudience - A flag indicating whether to check the audience (API key) in the payload.
        * @param {ShopifyAppCredentials[]} params.shopifyApps - An array of Shopify app credentials.
        */
-      async getPayloadThroughApps(
+      getPayloadThroughApps(
         bearerToken: string,
         params: { checkAudience?: boolean; shopifyApps?: ShopifyAppCredentials[] }
       ) {
         const { shopifyApps = this.getUsedApps(), checkAudience = true } = params
         let payload: ShopifySessionTokenPayload | undefined
         let error: InvalidJwtError | undefined
-        for await (const shopifyApp of shopifyApps) {
+        for (const shopifyApp of shopifyApps) {
           try {
             payload = jwt.verify(bearerToken, shopifyApp.api_secret) as ShopifySessionTokenPayload
 

@@ -77,7 +77,8 @@
     "@adonisjs/core": "^6.19.0"
   },
   "dependencies": {
-    "@shopify/shopify-api": "^11.14.1"
+    "@shopify/shopify-api": "^11.14.1",
+    "jsonwebtoken": "^9.0.2"
   },
   "homepage": "https://github.com/mixxtor/adonisjs-pusher#readme",
   "repository": {

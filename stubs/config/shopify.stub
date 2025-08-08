@@ -7,12 +7,16 @@ import { defineConfig } from '@mixxtor/adonisjs-shopify'
 import { restResources, type RestResources } from '@shopify/shopify-api/rest/admin/2025-07'
 import { LATEST_API_VERSION, LogSeverity } from '@shopify/shopify-api'
 
+const appUrlParts = new URL(env.get('APP_URL'))
+const webhookUrl = env.get('WEBHOOK_URL') || env.get('APP_URL')
+
 const shopify = defineConfig({
   apiKey: env.get('SHOPIFY_API_KEY', 'APIKeyFromPartnersDashboard'),
   apiSecretKey: env.get('SHOPIFY_API_SECRET', 'APISecretFromPartnersDashboard'),
   apiVersion: env.get('SHOPIFY_API_VERSION', LATEST_API_VERSION) as typeof LATEST_API_VERSION,
   scopes: env.get('SHOPIFY_API_SCOPES', 'read_products')?.split(','),
-  hostName: new URL(env.get('APP_URL')).hostname,
+  hostScheme: appUrlParts.protocol.replace(':', '') as 'http' | 'https',
+  hostName: appUrlParts.port ? appUrlParts.hostname + ':' + appUrlParts.port : appUrlParts.hostname,
   isEmbeddedApp: true,
   restResources: restResources,
   future: {
@@ -22,21 +26,21 @@ const shopify = defineConfig({
   extra_apps: env.get('SHOPIFY_API_EXTRA_APPS'), // for multiple apps to use the this API
   webhooks: {
     rest: {
-      'shop/update': '', // Updates shop information if any change is made from Shopify
-      'app/uninstalled': '', // Uninstalls the app
+      'shop/update': webhookUrl + '/webhooks/shops/update', // Updates shop information if any change is made from Shopify
+      'app/uninstalled': webhookUrl + '/webhooks/shops/uninstall', // Uninstalls the app
     },
     graphql: {
-      [SHOPIFY.GRAPH.WEBHOOK_TOPICS.SHOP_UPDATE]: '', // Updates shop information if any change is made from Shopify
-      [SHOPIFY.GRAPH.WEBHOOK_TOPICS.APP_UNINSTALLED]: '', // Uninstalls the app
+      [SHOPIFY.GRAPH.WEBHOOK_TOPICS.SHOP_UPDATE]: webhookUrl + '/webhooks/shops/update', // Updates shop information if any change is made from Shopify
+      [SHOPIFY.GRAPH.WEBHOOK_TOPICS.APP_UNINSTALLED]: webhookUrl + '/webhooks/shops/uninstall', // Uninstalls the app
     },
   },
   logger: env.get('DEBUG', false)
     ? {
-        level: LogSeverity.Debug,
-        timestamps: true,
-        httpRequests: true,
-        log: (_, message) => console?.debug(message),
-      }
+      level: LogSeverity.Debug,
+      timestamps: true,
+      httpRequests: true,
+      log: (_, message) => console?.debug(message),
+    }
     : undefined,
 })
 
@@ -44,5 +48,5 @@ export default shopify
 
 /** Extend the container types for proper inference */
 declare module '@mixxtor/adonisjs-shopify/types' {
-  interface ShopifyRestResources extends RestResources {}
+  interface ShopifyRestResources extends RestResources { }
 }

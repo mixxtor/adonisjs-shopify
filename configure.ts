@@ -37,7 +37,7 @@ export async function configure(command: ConfigureCommand) {
         SHOPIFY_API_SCOPES: 'Env.schema.string()',
         SHOPIFY_API_EXTRA_APPS: `(name: string, value: string | undefined) => {
           const apps = value?.split(',')
-          if (apps && apps?.every((v) => v.split(':').length !== 2)) {
+          if (value && apps?.every((v) => v.split(':').length !== 2)) {
             throw new Error(\`Value for \${name} must be a valid format: KEY_1:SECRET_1,KEY_2:SECRET_2,KEY_3:SECRET_3...\`)
           }
 

@@ -158,8 +158,8 @@ class ShopifyService<
 
       /**
        * Gen signature from array $params
-       * @param {Record<string, any>} params
-       * @returns
+       * @param {Record<string, any>} requestParams
+       * @param {Pick<ShopifyAppCredentials, 'api_secret'>} shopifyApp
        */
       generateSignature(
         requestParams: Record<string, any>,
@@ -168,6 +168,24 @@ class ShopifyService<
         const { api_secret: apiSecretKey } = shopifyApp
         const queryString = new URLSearchParams(requestParams).toString()
         return crypto.createHmac('sha256', apiSecretKey).update(queryString).digest('hex')
+      },
+
+      /**
+       * Get the list of Shopify apps used in the application, including the main app.
+       *
+       * This function returns a list of Shopify app configurations, including the main app,
+       * that is used for verification of signatures in the middleware.
+       *
+       * @return {ShopifyAppCredentials[]} The list of Shopify app configurations.
+       */
+      getUsedApps(): ShopifyAppCredentials[] {
+        // Set usedApps from extra apps without the current main app
+        const usedApps = config.extra_apps?.filter((a) => a.api_key !== config.apiKey) ?? []
+
+        // Add the current main app at the beginning of the list for faster validation on mainstream using
+        usedApps.unshift({ api_key: config.apiKey!, api_secret: config.apiSecretKey })
+
+        return usedApps
       },
 
       /**
@@ -181,19 +199,21 @@ class ShopifyService<
        * This usually is used for webhook/app proxy verification.
        *
        * @param queryParams - The query parameters including the signature to be verified.
+       * @param shopifyApps - Optional. An array of Shopify app credentials.
        * @returns The app configuration of the app whose secret matches the signature, or undefined if no match is found.
        */
-      verifySignatureThroughApps(queryParams: { signature: string } & Record<string, string>) {
+      verifySignatureThroughApps(
+        queryParams: { signature: string } & Record<string, string>,
+        shopifyApps?: ShopifyAppCredentials[]
+      ) {
         const { signature, ...restQueryParams } = queryParams
         const payload = Object.entries(restQueryParams)
           .sort()
-          .map(([key, value]) => `${key}=${value}`)
+          .map(([k, v]) => `${k}=${v}`)
           .join('')
+        const usedApps = shopifyApps ?? this.getUsedApps()
 
-        const usedApps = config.extra_apps?.filter((a) => a.api_key !== config.apiKey) // prepare used extra apps which is not duplicated main app
-        usedApps?.unshift({ api_key: config.apiKey!, api_secret: config.apiSecretKey }) // push main app to first, it should be checked first
-
-        return usedApps?.find(
+        return usedApps.find(
           (a) =>
             signature === crypto.createHmac('sha256', a.api_secret).update(payload).digest('hex')
         )
@@ -202,18 +222,17 @@ class ShopifyService<
       /**
        * Get verified Shopify payload through multi apps
        * @param {string} bearerToken - The bearer token to be verified.
-       * @param {ShopifyAppCredentials[]} shopifyApps - An array of Shopify app credentials.
        * @param {object} params - An object containing optional parameters.
        * @param {boolean} params.checkAudience - A flag indicating whether to check the audience (API key) in the payload.
+       * @param {ShopifyAppCredentials[]} params.shopifyApps - An array of Shopify app credentials.
        */
       async getPayloadThroughApps(
         bearerToken: string,
-        shopifyApps: ShopifyAppCredentials[],
-        params: { checkAudience: boolean }
+        params: { checkAudience?: boolean; shopifyApps?: ShopifyAppCredentials[] }
       ) {
-        const { checkAudience = true } = params
+        const { shopifyApps = this.getUsedApps(), checkAudience = true } = params
         let payload: ShopifySessionTokenPayload | undefined
-        let error: any | undefined
+        let error: InvalidJwtError | undefined
         for await (const shopifyApp of shopifyApps) {
           try {
             payload = jwt.verify(bearerToken, shopifyApp.api_secret) as ShopifySessionTokenPayload

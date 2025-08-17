@@ -74,10 +74,10 @@
     "typescript": "^5.9.2"
   },
   "peerDependencies": {
-    "@adonisjs/core": "^6.19.0"
+    "@adonisjs/core": "^6.19.0",
+    "@shopify/shopify-api": "^11.14.1"
   },
   "dependencies": {
-    "@shopify/shopify-api": "^11.14.1",
     "jsonwebtoken": "^9.0.2"
   },
   "homepage": "https://github.com/mixxtor/adonisjs-shopify#readme",

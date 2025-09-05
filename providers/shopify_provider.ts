@@ -20,7 +20,14 @@ export default class ShopifyProvider<
         use: (shopifyApp: ShopifyAppCredentials) => {
           shopifyConfig.app.apiKey = shopifyApp.api_key
           shopifyConfig.app.apiSecretKey = shopifyApp.api_secret
-          return this.#shopifyService(apiService, shopifyConfig)
+          return this.#shopifyService(apiService, {
+            ...shopifyConfig,
+            app: {
+              ...shopifyConfig.app,
+              apiKey: shopifyApp.api_key,
+              apiSecretKey: shopifyApp.api_secret,
+            },
+          })
         },
         ...this.#shopifyService(apiService, shopifyConfig),
       }
@@ -40,7 +47,7 @@ export default class ShopifyProvider<
     shopifyConfig: ShopifyConfig<Params, Resources, Future>
   ) {
     const shopifyApiInstance = service.api(shopifyConfig)
-    const helper = service.helper()
+    const helper = service.helper(shopifyConfig)
 
     return {
       api: shopifyApiInstance,

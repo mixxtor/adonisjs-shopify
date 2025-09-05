@@ -39,8 +39,7 @@ class ShopifyService<
     return this.#apiInstance[apiKey]
   }
 
-  helper() {
-    const config = this.#config
+  helper(config = this.#config) {
     const plans: Shopify['Plan'][] = (
       Object.keys(SHOPIFY.PLAN.UNIT) as (keyof typeof SHOPIFY.PLAN.UNIT)[]
     ).map((u) => SHOPIFY.PLAN.UNIT[u])

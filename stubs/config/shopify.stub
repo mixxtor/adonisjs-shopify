@@ -11,17 +11,27 @@ const appUrlParts = new URL(env.get('APP_URL'))
 const webhookUrl = env.get('WEBHOOK_URL') || env.get('APP_URL')
 
 const shopify = defineConfig({
-  apiKey: env.get('SHOPIFY_API_KEY', 'APIKeyFromPartnersDashboard'),
-  apiSecretKey: env.get('SHOPIFY_API_SECRET', 'APISecretFromPartnersDashboard'),
-  apiVersion: env.get('SHOPIFY_API_VERSION', LATEST_API_VERSION) as typeof LATEST_API_VERSION,
-  scopes: env.get('SHOPIFY_API_SCOPES', 'read_products')?.split(','),
-  hostScheme: appUrlParts.protocol.replace(':', '') as 'http' | 'https',
-  hostName: appUrlParts.port ? appUrlParts.hostname + ':' + appUrlParts.port : appUrlParts.hostname,
-  isEmbeddedApp: true,
-  restResources: restResources,
-  future: {
-    customerAddressDefaultFix: true,
-    unstable_managedPricingSupport: true,
+  app: {
+    apiKey: env.get('SHOPIFY_API_KEY', 'APIKeyFromPartnersDashboard'),
+    apiSecretKey: env.get('SHOPIFY_API_SECRET', 'APISecretFromPartnersDashboard'),
+    apiVersion: env.get('SHOPIFY_API_VERSION', LATEST_API_VERSION) as typeof LATEST_API_VERSION,
+    scopes: env.get('SHOPIFY_API_SCOPES', 'read_products')?.split(','),
+    hostScheme: appUrlParts.protocol.replace(':', '') as 'http' | 'https',
+    hostName: appUrlParts.port ? appUrlParts.hostname + ':' + appUrlParts.port : appUrlParts.hostname,
+    isEmbeddedApp: true,
+    restResources: restResources,
+    future: {
+      customerAddressDefaultFix: true,
+      unstable_managedPricingSupport: true,
+    },
+    logger: env.get('DEBUG', false)
+      ? {
+        level: LogSeverity.Debug,
+        timestamps: true,
+        httpRequests: true,
+        log: (_, message) => console?.debug(message),
+      }
+      : undefined,
   },
   extra_apps: env.get('SHOPIFY_API_EXTRA_APPS'), // for multiple apps to use the this API
   webhooks: {
@@ -34,14 +44,6 @@ const shopify = defineConfig({
       [SHOPIFY.GRAPH.WEBHOOK_TOPICS.APP_UNINSTALLED]: webhookUrl + '/webhooks/shops/uninstall', // Uninstalls the app
     },
   },
-  logger: env.get('DEBUG', false)
-    ? {
-      level: LogSeverity.Debug,
-      timestamps: true,
-      httpRequests: true,
-      log: (_, message) => console?.debug(message),
-    }
-    : undefined,
 })
 
 export default shopify

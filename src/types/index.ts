@@ -111,15 +111,20 @@ type TCustomConfig = {
   extra_apps?: ShopifyAppCredentials[]
 }
 
-export type ShopifyConfig<
+type Config<
   Params extends ConfigParams<Resources, Future>,
   Resources extends ShopifyRestResources = ShopifyRestResources,
   Future extends FutureFlagOptions = FutureFlagOptions,
 > = {
   future?: Future
   restResources?: Resources
-} & Params &
-  TCustomConfig
+} & Params
+
+export type ShopifyConfig<
+  Params extends ConfigParams<Resources, Future>,
+  Resources extends ShopifyRestResources = ShopifyRestResources,
+  Future extends FutureFlagOptions = FutureFlagOptions,
+> = { app: Config<Params, Resources, Future> } & TCustomConfig
 
 interface TShopifyService<
   Params extends ConfigParams<Resources, Future>,

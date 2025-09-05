@@ -31,9 +31,9 @@ class ShopifyService<
   api(
     config: ShopifyConfig<Params, Resources, Future> = this.#config
   ): ShopifyApi<Params, Resources, Future> {
-    const apiKey = config.apiKey!
+    const apiKey = config.app.apiKey!
     if (!this.#apiInstance[apiKey]) {
-      this.#apiInstance[apiKey] = shopifyApi<Params, Resources, Future>(config)
+      this.#apiInstance[apiKey] = shopifyApi<Params, Resources, Future>(config.app)
     }
 
     return this.#apiInstance[apiKey]
@@ -47,7 +47,7 @@ class ShopifyService<
 
     return {
       // ...this.api().utils,
-      scope: new Scope(config.scopes),
+      scope: new Scope(config.app.scopes),
       plan: {
         /**
          * Get all or filtered plans.
@@ -180,10 +180,10 @@ class ShopifyService<
        */
       getUsedApps(): ShopifyAppCredentials[] {
         // Set usedApps from extra apps without the current main app
-        const usedApps = config.extra_apps?.filter((a) => a.api_key !== config.apiKey) ?? []
+        const usedApps = config.extra_apps?.filter((a) => a.api_key !== config.app.apiKey) ?? []
 
         // Add the current main app at the beginning of the list for faster validation on mainstream using
-        usedApps.unshift({ api_key: config.apiKey!, api_secret: config.apiSecretKey })
+        usedApps.unshift({ api_key: config.app.apiKey!, api_secret: config.app.apiSecretKey })
 
         return usedApps
       },

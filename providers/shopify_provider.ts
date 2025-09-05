@@ -20,8 +20,8 @@ export default class ShopifyProvider<
         use: (shopifyApp: ShopifyAppCredentials) => {
           return this.#shopifyService(apiService, {
             ...shopifyConfig,
-            api_key: shopifyApp.api_key,
-            api_secret: shopifyApp.api_secret,
+            apiKey: shopifyApp.api_key,
+            apiSecret: shopifyApp.api_secret,
           })
         },
         ...this.#shopifyService(apiService, shopifyConfig),

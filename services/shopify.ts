@@ -80,10 +80,10 @@ class ShopifyService<
             .map((p) => p.key),
       },
 
-      webhooks(group: keyof NonNullable<typeof config.webhooks>) {
-        return Object.entries(config.webhooks?.[group] ?? []).map(([topic, routePath]) => ({
+      webhooks(group: 'rest' | 'graphql' = 'graphql'): { address: string; topic: string }[] {
+        return Object.entries(config.webhooks ?? []).map(([topic, routePath]) => ({
           address: routePath as string,
-          topic: topic,
+          topic: group === 'graphql' ? topic.replace('/', '_').toUpperCase() : topic,
         }))
       },
 
@@ -179,7 +179,7 @@ class ShopifyService<
        */
       getUsedApps(): ShopifyAppCredentials[] {
         // Set usedApps from extra apps without the current main app
-        const usedApps = config.extra_apps?.filter((a) => a.api_key !== config.app.apiKey) ?? []
+        const usedApps = config.trusted_apps?.filter((a) => a.api_key !== config.app.apiKey) ?? []
 
         // Add the current main app at the beginning of the list for faster validation on mainstream using
         usedApps.unshift({ api_key: config.app.apiKey!, api_secret: config.app.apiSecretKey })

@@ -60,14 +60,38 @@ declare module '@mixxtor/adonisjs-shopify/types' {
 }
 
 const shopifyConfig = defineConfig({
-  api_key: env.get('SHOPIFY_API_KEY'),
-  api_secret: env.get('SHOPIFY_API_SECRET'),
-  api_version: env.get('SHOPIFY_API_VERSION', '2025-01'),
-  host_name: env.get('SHOPIFY_HOST_NAME'),
-  scopes: env.get('SHOPIFY_SCOPES', '').split(','),
-  is_embedded_app: true,
-  is_private_app: false,
-  // Add other Shopify configuration options as needed
+  /**
+   * Shopify configurations
+   * @see https://github.com/Shopify/shopify-app-js/blob/main/packages/apps/shopify-api/docs/reference/shopifyApi.md
+   */
+  app: {
+    apiKey: env.get('SHOPIFY_API_KEY'),
+    apiSecretKey: env.get('SHOPIFY_API_SECRET'),
+    apiVersion: env.get('SHOPIFY_API_VERSION', '2025-01'),
+    hostName: env.get('SHOPIFY_HOST_NAME'),
+    scopes: env.get('SHOPIFY_SCOPES', '').split(','),
+    scopes: env.get('SHOPIFY_API_SCOPES', 'read_products')?.split(','),
+    hostScheme: 'https',
+    hostName: env.get('SHOPIFY_HOST_NAME'),
+    isEmbeddedApp: true,
+    isPrivateApp: false,
+    // Add other Shopify configuration options as needed
+  },
+
+  /**
+   * A list of additional Shopify apps (e.g., for development or testing)
+   * whose credentials are also accepted when validating requests.
+   */
+  trusted_app: env.get('SHOPIFY_API_TRUSTED_APPS'),
+
+  /**
+   * Defines the Shopify webhook topics that this app should register,
+   * along with their corresponding handler URLs.
+   */
+  webhooks: {
+    [SHOPIFY.WEBHOOK_TOPICS.SHOP_UPDATE]: 'https://myapp.com/webhooks/shops/update', // Updates shop information if any change is made from Shopify
+    [SHOPIFY.WEBHOOK_TOPICS.APP_UNINSTALLED]: 'https://myapp.com/webhooks/shops/uninstall', // Uninstalls the app
+  }
 })
 
 export default shopifyConfig
@@ -227,18 +251,6 @@ All resources from `@shopify/shopify-api/rest/admin/2025-07`:
 - `Webhook`, `ScriptTag`, `Asset`
 - `Shop`, `Country`, `Province`
 - And 60+ more resources with full type support...
-
-## Configuration Options
-
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `api_key` | string | - | Your Shopify app's API key |
-| `api_secret` | string | - | Your Shopify app's API secret |
-| `api_version` | string | '2025-01' | Shopify API version |
-| `host_name` | string | - | Your app's host name |
-| `scopes` | string[] | [] | Required OAuth scopes |
-| `is_embedded_app` | boolean | true | Whether app is embedded |
-| `is_private_app` | boolean | false | Whether app is private |
 
 ## License
 

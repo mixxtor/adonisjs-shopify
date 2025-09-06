@@ -1,8 +1,4 @@
-import type {
-  ConfigParams,
-  Shopify as ShopifyApi,
-  // ShopifyRestResources,
-} from '@shopify/shopify-api'
+import type { ConfigParams, Shopify as ShopifyApi } from '@shopify/shopify-api'
 import { SHOPIFY } from '../constants/shopify.js'
 import ShopifyService from '../../services/shopify.js'
 
@@ -88,27 +84,23 @@ type TCustomConfig = {
   // }
 
   /**
-   * Webhooks to be registered on Shopify.
-   * Note that we have `rest` and `graphql` webhooks which are different topics & events' responses.
+   * Defines the Shopify webhook topics that this app should register,
+   * along with their corresponding handler URLs.
    */
-  webhooks?: {
-    /**
-     * REST Webhooks to be registered on Shopify based on the specified group.
-     * @link https://shopify.dev/docs/api/webhooks
-     */
-    rest: Record<string, string>
-    /**
-     * GraphQL Webhooks to be registered on Shopify.
-     * @link https://shopify.dev/docs/api/admin-graphql/2025-07/enums/WebhookSubscriptionTopic
-     */
-    graphql: { [topic in keyof typeof SHOPIFY.GRAPH.WEBHOOK_TOPICS | (string & {})]?: string }
-  }
+  webhooks?: { [topic in keyof typeof SHOPIFY.WEBHOOK_TOPICS | (string & {})]?: string }
 
   /**
+   * @deprecated - use `trusted_apps` instead
    * Extra Shopify apps credentials to be used for multiple apps validation.
    * @example [{ api_key: 'key', api_secret: 'secret' }, { api_key: 'key2', api_secret: 'secret2' }]
    */
   extra_apps?: ShopifyAppCredentials[]
+
+  /**
+   * A list of additional Shopify apps (e.g., for development or testing)
+   * whose credentials are also accepted when validating requests.
+   */
+  trusted_apps?: ShopifyAppCredentials[]
 }
 
 type Config<

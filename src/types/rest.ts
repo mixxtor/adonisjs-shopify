@@ -1,6 +1,7 @@
 import ShopifyProvider from '../../providers/shopify_provider.js'
-import { Session, ApiVersion, ShopifyClients, ShopifyRestResources } from '@shopify/shopify-api'
+import { Session, ApiVersion, ShopifyClients } from '@shopify/shopify-api'
 import { SHOPIFY } from '../constants/shopify.js'
+import type { ShopifyRestResources } from './index.js'
 export * from './resource.js'
 
 // type RestResources = Record<string, any>

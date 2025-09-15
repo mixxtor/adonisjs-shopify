@@ -1,4 +1,8 @@
-import type { ConfigParams, Shopify as ShopifyApi } from '@shopify/shopify-api'
+import type {
+  ConfigParams,
+  Shopify as ShopifyApi,
+  ShopifyRestResources as RestResources,
+} from '@shopify/shopify-api'
 import { SHOPIFY } from '../constants/shopify.js'
 import ShopifyService from '../../services/shopify.js'
 
@@ -6,7 +10,7 @@ import ShopifyService from '../../services/shopify.js'
  * A list of REST resources inferred using the config defined inside
  * the user-land application
  */
-export interface ShopifyRestResources {}
+export interface ShopifyRestResources extends RestResources {}
 
 /**
  * Type to infer rest resources from config

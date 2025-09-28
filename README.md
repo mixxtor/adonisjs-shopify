@@ -1,4 +1,4 @@
-![@mixxtor/adonisjs-shopify](https://socialify.git.ci/mixxtor/adonisjs-shopify/image?description=1&descriptionEditable=Shopify%20adapter%20for%20AdonisJS.&font=Jost&forks=1&issues=1&logo=https://cdn.shopify.com/shopifycloud/brochure/assets/brand-assets/shopify-logo-shopping-bag-full-color-66166b2e55d67988b56b4bd28b63c271e2b9713358cb723070a92bde17ad7d63.svg&name=1&owner=1&pattern=Charlie%20Brown&pulls=1&stargazers=1&theme=Auto)
+![@mixxtor/adonisjs-shopify](https://socialify.git.ci/@mixxtor/adonisjs-shopify/image?description=1&descriptionEditable=Shopify%20adapter%20for%20AdonisJS.&font=Jost&forks=1&issues=1&logo=https://cdn.shopify.com/shopifycloud/brochure/assets/brand-assets/shopify-logo-shopping-bag-full-color-66166b2e55d67988b56b4bd28b63c271e2b9713358cb723070a92bde17ad7d63.svg&name=1&owner=1&pattern=Charlie%20Brown&pulls=1&stargazers=1&theme=Auto)
 
 # Introduce
 

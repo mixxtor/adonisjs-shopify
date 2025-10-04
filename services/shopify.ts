@@ -12,9 +12,14 @@ import jwt from 'jsonwebtoken'
 import { SHOPIFY } from '../src/constants/shopify.js'
 import { Scope } from '../src/scope.js'
 import { parseGid } from '@shopify/admin-graphql-api-utilities'
-import type { Shopify, TShopifyGqlResultData, TShopifyGResource } from '../src/types/rest.js'
+import type { Shopify } from '../src/types/rest.js'
 import type { ShopifyConfig } from '../src/index.js'
-import type { FutureFlagOptions, ShopifyAppCredentials } from '../src/types/index.js'
+import type {
+  FutureFlagOptions,
+  ShopifyAppCredentials,
+  TShopifyGResource,
+  ShopifyGqlResult,
+} from '../src/types/index.js'
 
 class ShopifyService<
   Params extends ConfigParams<Resources, Future>,
@@ -130,8 +135,17 @@ class ShopifyService<
        * @param formatFunc - Optional. The function used to format each item.
        * @return A promise that resolves to the paginated data set.
        */
-      async gqlPaginate<Data = any, Output = Data>(
-        data: RequestReturn<TShopifyGqlResultData<Data, string>>['body'][string],
+      async gqlPaginate<
+        Node extends Record<string, any>,
+        Input extends RequestReturn<ShopifyGqlResult<Node, 'edges' | 'nodes'>>['body'],
+        Data = Input extends { nodes: (infer N)[] }
+          ? N
+          : Input extends { edges: { node: infer E }[] }
+            ? E
+            : never,
+        Output = Data,
+      >(
+        data: Input,
         formatFunc?: (item: Data, ...param: any) => Promise<Output> | Output
       ): Promise<{
         items: Output[]
@@ -148,8 +162,10 @@ class ShopifyService<
           },
         }
 
-        for (const item of data.nodes ?? data.edges?.map((i) => i.node) ?? []) {
-          result.items.push(formatFunc ? await formatFunc(item) : (item as unknown as Output))
+        const nodes = (data as RequestReturn<ShopifyGqlResult<Node, 'nodes'>>['body']).nodes
+        const edges = (data as RequestReturn<ShopifyGqlResult<Node, 'edges'>>['body']).edges
+        for (const item of (nodes ?? edges)?.map((i) => i.node) ?? []) {
+          result.items.push(formatFunc ? await formatFunc(item) : item)
         }
 
         return result

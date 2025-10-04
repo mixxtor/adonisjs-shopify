@@ -6,17 +6,18 @@ export type TShopifyResource = (typeof SHOPIFY.RESOURCE)[keyof typeof SHOPIFY.RE
 export type TShopifyGResource = (typeof SHOPIFY.GRAPH.RESOURCE)[keyof typeof SHOPIFY.GRAPH.RESOURCE]
 
 type TShopifyMetadataResult = {
-  userErrors?: { field: string; message: string }[]
+  userErrors?: { field?: string; message?: string; code: string }[]
   pageInfo?: {
-    startCursor: string
-    endCursor: string
-    hasNextPage: boolean
-    hasPreviousPage: boolean
+    startCursor?: string
+    endCursor?: string
+    hasNextPage?: boolean
+    hasPreviousPage?: boolean
   }
 }
 
 /**
  * Type of Shopify GraphQL (request) API results
+ * @deprecated Use `ShopifyGqlResult` instead. This may hard to recurse through the result.
  * @argument {string} D Query resource result
  * @argument {string} R Query resource
  */
@@ -36,12 +37,15 @@ export type TShopifyGqlResultData<
 
 /**
  * Type of Shopify GraphQL (query) API resources
- * @deprecated Use `TShopifyGqlResultData` instead. Since Shopify stopping using this type with `gqlClient.query()`, they now suggest using `gqlClient.request()` instead with `TShopifyGqlResultData`.
+ * @deprecated Use `ShopifyGqlResult` instead. Since Shopify stopping using this type with `gqlClient.query()`, they now suggest using `gqlClient.request()` instead.
  * @argument {string} D Query resource result
  * @argument {string} R Query resource
  */
-export type TShopifyGqlResult<D = Record<string, any>, R extends string | undefined = undefined> = {
-  data: TShopifyGqlResultData<D, R>
+export type TShopifyGqlResult<
+  D = Record<string, any>,
+  R extends 'nodes' | 'edges' | undefined = undefined,
+> = {
+  data: ShopifyGqlResult<D, R>
   extensions: {
     cost: {
       requestedQueryCost: number
@@ -54,3 +58,19 @@ export type TShopifyGqlResult<D = Record<string, any>, R extends string | undefi
     }
   }
 }
+
+/**
+ * Type of Shopify GraphQL (request) API results
+ * @argument {string} D Query resource result
+ * @argument {string} P Pagination type
+ * - `undefined` if not paginated by `edges` or returned collection of data objects by `nodes`
+ * - `'nodes'` if streamlined collection of data objects without additional layers by `nodes`
+ * - `'edges'` if organized collection of data objects paginated by `edges`
+ */
+export type ShopifyGqlResult<
+  D = Record<string, any>,
+  P extends 'nodes' | 'edges' | undefined = undefined,
+> = P extends undefined
+  ? D & Pick<TShopifyMetadataResult, 'userErrors'>
+  : (P extends 'nodes' ? { nodes: D[] } : { edges: { cursor?: string; node: D }[] }) &
+      TShopifyMetadataResult

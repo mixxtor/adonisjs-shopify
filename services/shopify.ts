@@ -132,7 +132,7 @@ class ShopifyService<
        * Paginates through a graph data set and formats each item using a provided function.
        *
        * @param data - The graph data set to paginate through.
-       * @param formatFunc - Optional. The function used to format each item.
+       * @param fn - Optional. The function used to format each item.
        * @return A promise that resolves to the paginated data set.
        */
       async gqlPaginate<
@@ -146,7 +146,7 @@ class ShopifyService<
         Output = Data,
       >(
         data: Input,
-        formatFunc?: (item: Data, ...param: any) => Promise<Output> | Output
+        fn?: (item: Data, ...param: any) => Promise<Output> | Output
       ): Promise<{
         items: Output[]
         meta: { next_cursor?: string | null; previous_cursor?: string | null }
@@ -163,9 +163,11 @@ class ShopifyService<
         }
 
         const nodes = (data as RequestReturn<ShopifyGqlResult<Node, 'nodes'>>['body']).nodes
-        const edges = (data as RequestReturn<ShopifyGqlResult<Node, 'edges'>>['body']).edges
-        for (const item of (nodes ?? edges)?.map((i) => i.node) ?? []) {
-          result.items.push(formatFunc ? await formatFunc(item) : item)
+        const edges = (data as RequestReturn<ShopifyGqlResult<Node, 'edges'>>['body']).edges?.map(
+          (i) => i.node
+        )
+        for (const node of nodes ?? edges ?? []) {
+          result.items.push(fn ? await fn(node as unknown as Data) : (node as unknown as Output))
         }
 
         return result

@@ -209,7 +209,7 @@ export default class WebhookController {
         rawRequest: request.request
       })
       
-      if (!isValid) {
+      if (!isValid.valid) {
         return response.unauthorized()
       }
       

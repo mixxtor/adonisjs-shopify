@@ -11,7 +11,6 @@ import crypto from 'node:crypto'
 import jwt from 'jsonwebtoken'
 import { SHOPIFY } from '../src/constants/shopify.js'
 import { Scope } from '../src/scope.js'
-import { parseGid } from '@shopify/admin-graphql-api-utilities'
 import type { Shopify } from '../src/types/rest.js'
 import type { ShopifyConfig } from '../src/index.js'
 import type {
@@ -98,10 +97,13 @@ class ShopifyService<
 
       gid2Id(graphQlId: string): string {
         try {
-          return parseGid(graphQlId)
-        } catch {
-          return graphQlId
-        }
+          const id = `/${graphQlId}`
+          const matches = /\/(\w[\w-]*)(?:\?(.*))*$/.exec(id)
+          if (matches && matches[1] !== undefined) {
+            return matches[1]
+          }
+        } catch {}
+        return graphQlId
       },
 
       /**

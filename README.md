@@ -41,11 +41,10 @@ The package provider should be automatically registered in `adonisrc.ts`:
 export default defineConfig({
   providers: [
     // ... other providers
-    () => import('@mixxtor/adonisjs-shopify/providers/shopify_provider')
-  ]
+    () => import('@mixxtor/adonisjs-shopify/providers/shopify_provider'),
+  ],
 })
 ```
-
 
 ### 4. Create Configuration File
 
@@ -93,7 +92,7 @@ const shopifyConfig = defineConfig({
   webhooks: {
     [SHOPIFY.WEBHOOK_TOPICS.SHOP_UPDATE]: 'https://myapp.com/webhooks/shops/update', // Updates shop information if any change is made from Shopify
     [SHOPIFY.WEBHOOK_TOPICS.APP_UNINSTALLED]: 'https://myapp.com/webhooks/shops/uninstall', // Uninstalls the app
-  }
+  },
 })
 
 export default shopifyConfig
@@ -132,7 +131,7 @@ export default class ProductService {
     const product = new this.shopify.api.rest.Product({ session })
     product.title = productData.title
     product.body_html = productData.description
-    
+
     await product.save()
     return product
   }
@@ -147,10 +146,10 @@ import shopify from '@mixxtor/adonisjs-shopify/services/main'
 
 export default class ShopController {
   async index({ session }: HttpContext) {
-    const products = await shopify.api.rest.Product.all({ 
-      session: session.shopifySession 
+    const products = await shopify.api.rest.Product.all({
+      session: session.shopifySession,
     })
-    
+
     return products.data
   }
 }
@@ -170,27 +169,27 @@ export default class AuthController {
 
   async redirect({ request, response }: HttpContext) {
     const shop = request.input('shop')
-    
+
     const authUrl = await this.shopify.auth.begin({
       shop,
       callbackPath: '/auth/callback',
-      isOnline: false
+      isOnline: false,
     })
-    
+
     return response.redirect(authUrl)
   }
 
   async callback({ request, response }: HttpContext) {
     const authResult = await this.shopify.auth.callback({
       rawRequest: request.request,
-      rawResponse: response.response
+      rawResponse: response.response,
     })
-    
+
     if (authResult.session) {
       // Store session and redirect to app
       return response.redirect('/dashboard')
     }
-    
+
     return response.badRequest('Authentication failed')
   }
 }
@@ -206,16 +205,16 @@ export default class WebhookController {
     try {
       const isValid = await shopify.webhooks.validate({
         rawBody: request.raw(),
-        rawRequest: request.request
+        rawRequest: request.request,
       })
-      
+
       if (!isValid.valid) {
         return response.unauthorized()
       }
-      
+
       const topic = request.header('x-shopify-topic')
       const payload = request.body()
-      
+
       // Handle webhook based on topic
       switch (topic) {
         case 'orders/create':
@@ -225,7 +224,7 @@ export default class WebhookController {
           await this.handleProductUpdate(payload)
           break
       }
-      
+
       return response.ok()
     } catch (error) {
       return response.internalServerError()
@@ -247,6 +246,7 @@ export default class WebhookController {
 ### Supported REST Resources
 
 All resources from `@shopify/shopify-api/rest/admin/2025-07`:
+
 - `Product`, `Variant`, `Collection`
 - `Customer`, `Order`, `DraftOrder`
 - `Inventory`, `Location`, `FulfillmentService`

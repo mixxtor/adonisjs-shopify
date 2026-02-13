@@ -11,7 +11,7 @@ import crypto from 'node:crypto'
 import jwt from 'jsonwebtoken'
 import { SHOPIFY } from '../src/constants/shopify.js'
 import { Scope } from '../src/scope.js'
-import type { Shopify } from '../src/types/rest.js'
+import type { TPlanGroup, TPlanName, TShopifyPlan } from '../src/types/plan.js'
 import type { ShopifyConfig } from '../src/index.js'
 import type {
   FutureFlagOptions,
@@ -44,9 +44,10 @@ class ShopifyService<
   }
 
   helper(config = this.#config) {
-    const plans: Shopify['Plan'][] = (
-      Object.keys(SHOPIFY.PLAN.UNIT) as (keyof typeof SHOPIFY.PLAN.UNIT)[]
-    ).map((u) => SHOPIFY.PLAN.UNIT[u])
+    const plans: TShopifyPlan[] = [
+      ...Object.values(SHOPIFY.PLAN.REST),
+      ...Object.values(SHOPIFY.PLAN.GQL),
+    ]
 
     return {
       // ...this.api().utils,
@@ -56,32 +57,30 @@ class ShopifyService<
          * Get all or filtered plans.
          *
          * @param {string} keyword - The keyword to filter by.
-         * @return {Shopify['Plan'][]} An array of Shopify plans.
+         * @return {TShopifyPlan[]} An array of Shopify plans.
          */
-        get: (keyword?: string): Shopify['Plan'][] =>
-          plans.filter((p) => (keyword ? p.key.includes(keyword) : p)),
+        get: (keyword?: string): TShopifyPlan[] =>
+          plans.filter((p) => (keyword ? p.name.includes(keyword) : p)),
 
         /**
-         * Get all plan keys.
+         * Get all plan names.
          *
          * @param {string} keyword - The keyword to filter by.
-         * @return {Shopify['Plan'][]} An array of Shopify plans.
+         * @return {TShopifyPlan[]} An array of Shopify plans.
          */
-        getKeys: (keyword?: string): Shopify['PlanKey'][] =>
-          plans.filter((p) => (keyword ? p.key.includes(keyword) : p)).map((p) => p.key),
+        getNames: (keyword?: string): TPlanName[] =>
+          plans.filter((p) => (keyword ? p.name.includes(keyword) : p)).map((p) => p.name),
 
         /**
-         * Get plan keys by group.
+         * Get plan names by group.
          *
-         * @param {Shopify['PlanGroup']} group - The group to filter the plans by.
-         * @return {Shopify['Plan'][]} An array of Shopify plans.
+         * @param {TPlanGroup} group - The group to filter the plans by.
+         * @return {TShopifyPlan[]} An array of Shopify plans.
          */
-        getKeysByGroup: <G extends Shopify['PlanGroup']>(group: G): Shopify['PlanKey'][] =>
+        getNamesByGroup: <G extends TPlanGroup>(group: G): TPlanName[] =>
           plans
-            .filter((p) =>
-              group ? (p.groups as any as Shopify['PlanGroup'][]).includes(group) : p
-            )
-            .map((p) => p.key),
+            .filter((p) => (group ? (p.groups as unknown as TPlanGroup[]).includes(group) : p))
+            .map((p) => p.name),
       },
 
       webhooks(group: 'rest' | 'graphql' = 'graphql'): { address: string; topic: string }[] {

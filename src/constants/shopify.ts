@@ -1,6 +1,7 @@
 import { SHOPIFY_WEBHOOK_TOPICS } from './webhook.js'
 
 const SHOPIFY_PLAN_GROUP = {
+  AI: 'ai',
   STAFF: 'staff',
   UNAVAILABLE: 'unavailable',
   AVAILABLE: 'available',
@@ -9,97 +10,248 @@ const SHOPIFY_PLAN_GROUP = {
   FREE: 'free',
 } as const
 
-const SHOPIFY_PLANS = {
+/** SHOPIFY REST API Known Plans */
+const SHOPIFY_REST_API_PLANS = {
   // known plans
-  AFFILIATE: { key: 'affiliate', groups: [SHOPIFY_PLAN_GROUP.AVAILABLE] },
-  COMPED: { key: 'comped', groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.FREE] },
-
-  STARTER: { key: 'starter', groups: [SHOPIFY_PLAN_GROUP.AVAILABLE] },
-  STARTER_2022: { key: 'starter_2022', groups: [SHOPIFY_PLAN_GROUP.AVAILABLE] },
-  STARTER_2022_TRIAL: {
-    key: 'starter_2022_trial',
+  AFFILIATE: {
+    name: 'affiliate',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE],
+  },
+  COMPED: {
+    name: 'comped',
     groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.FREE],
   },
 
-  BASIC: { key: 'basic', groups: [SHOPIFY_PLAN_GROUP.AVAILABLE] },
-  STANDARD: { key: 'standard', groups: [SHOPIFY_PLAN_GROUP.AVAILABLE] },
+  STARTER: {
+    name: 'starter',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE],
+  },
+  STARTER_2022: {
+    name: 'starter_2022',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE],
+  },
+  STARTER_2022_TRIAL: {
+    name: 'starter_2022_trial',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.FREE],
+  },
+
+  BASIC: {
+    name: 'basic',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE],
+  },
+  STANDARD: {
+    name: 'standard',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE],
+  },
   PROFESSIONAL: {
-    key: 'professional',
+    name: 'professional',
     groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.ADVANCED],
   },
   BUSINESS: {
-    key: 'business',
+    name: 'business',
     groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.ADVANCED],
   },
-  SHOPIFY_ALUMNI: { key: 'shopify_alumni', groups: [SHOPIFY_PLAN_GROUP.AVAILABLE] },
+  SHOPIFY_ALUMNI: {
+    name: 'shopify_alumni',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE],
+  },
   SHOPIFY_PLUS: {
-    key: 'shopify_plus',
+    name: 'shopify_plus',
     groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.ADVANCED],
   },
   UNLIMITED: {
-    key: 'unlimited',
+    name: 'unlimited',
     groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.ADVANCED],
   },
-  CUSTOM: { key: 'custom', groups: [SHOPIFY_PLAN_GROUP.AVAILABLE] },
+  CUSTOM: {
+    name: 'custom',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE],
+  },
 
-  NONPROFIT: { key: 'nonprofit', groups: [SHOPIFY_PLAN_GROUP.AVAILABLE] },
-  NPO_FULL: { key: 'npo_full', groups: [SHOPIFY_PLAN_GROUP.AVAILABLE] },
-  NPO_LITE: { key: 'npo_lite', groups: [SHOPIFY_PLAN_GROUP.AVAILABLE] },
+  NONPROFIT: {
+    name: 'nonprofit',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE],
+  },
+  NPO_FULL: {
+    name: 'npo_full',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE],
+  },
+  NPO_LITE: {
+    name: 'npo_lite',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE],
+  },
 
-  SINGTEL_BASIC: { key: 'singtel_basic', groups: [SHOPIFY_PLAN_GROUP.AVAILABLE] },
-  SINGTEL_PROFESSIONAL: { key: 'singtel_professional', groups: [SHOPIFY_PLAN_GROUP.AVAILABLE] },
+  SINGTEL_BASIC: {
+    name: 'singtel_basic',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE],
+  },
+  SINGTEL_PROFESSIONAL: {
+    name: 'singtel_professional',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE],
+  },
   SINGTEL_TRIAL: {
-    key: 'singtel_trial',
+    name: 'singtel_trial',
     groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.FREE],
   },
 
-  UAFRICA_BASIC: { key: 'uafrica_basic', groups: [SHOPIFY_PLAN_GROUP.AVAILABLE] },
-  UAFRICA_PROFESSIONAL: { key: 'uafrica_professional', groups: [SHOPIFY_PLAN_GROUP.AVAILABLE] },
+  UAFRICA_BASIC: {
+    name: 'uafrica_basic',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE],
+  },
+  UAFRICA_PROFESSIONAL: {
+    name: 'uafrica_professional',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE],
+  },
 
-  TRIAL: { key: 'trial', groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.FREE] },
-  PAID_TRIAL: {
-    key: 'paid_trial',
+  TRIAL: {
+    name: 'trial',
     groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.FREE],
+  },
+  PAID_TRIAL: {
+    name: 'paid_trial',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE],
   },
 
   STAFF: {
-    key: 'staff',
+    name: 'staff',
     groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.TEST, SHOPIFY_PLAN_GROUP.STAFF],
   },
   STAFF_BUSINESS: {
-    key: 'staff_business',
+    name: 'staff_business',
     groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.TEST, SHOPIFY_PLAN_GROUP.STAFF],
   },
   GRANDFATHER: {
-    key: 'grandfather',
+    name: 'grandfather',
     groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.TEST, SHOPIFY_PLAN_GROUP.STAFF],
   },
   GRANDFATHERED: {
-    key: 'grandfathered',
+    name: 'grandfathered',
     groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.FREE, SHOPIFY_PLAN_GROUP.STAFF],
   },
 
   PARTNER_TEST: {
-    key: 'partner_test',
+    name: 'partner_test',
     groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.FREE, SHOPIFY_PLAN_GROUP.TEST],
   },
   PLUS_PARTNER_SANDBOX: {
-    key: 'plus_partner_sandbox',
+    name: 'plus_partner_sandbox',
     groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.FREE, SHOPIFY_PLAN_GROUP.TEST],
   },
   SALES_TRAINING: {
-    key: 'sales_training',
+    name: 'sales_training',
     groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.FREE, SHOPIFY_PLAN_GROUP.TEST],
   },
   OPEN_LEARNING: {
-    key: 'open_learning',
+    name: 'open_learning',
     groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.FREE, SHOPIFY_PLAN_GROUP.TEST],
   },
 
-  CANCELLED: { key: 'cancelled', groups: [SHOPIFY_PLAN_GROUP.UNAVAILABLE] },
-  DORMANT: { key: 'dormant', groups: [SHOPIFY_PLAN_GROUP.UNAVAILABLE] },
-  FRAUDULENT: { key: 'fraudulent', groups: [SHOPIFY_PLAN_GROUP.UNAVAILABLE] },
-  FROZEN: { key: 'frozen', groups: [SHOPIFY_PLAN_GROUP.UNAVAILABLE] },
+  CANCELLED: {
+    name: 'cancelled',
+    groups: [SHOPIFY_PLAN_GROUP.UNAVAILABLE],
+  },
+  DORMANT: {
+    name: 'dormant',
+    groups: [SHOPIFY_PLAN_GROUP.UNAVAILABLE],
+  },
+  FRAUDULENT: {
+    name: 'fraudulent',
+    groups: [SHOPIFY_PLAN_GROUP.UNAVAILABLE],
+  },
+  FROZEN: {
+    name: 'frozen',
+    groups: [SHOPIFY_PLAN_GROUP.UNAVAILABLE],
+  },
+} as const
+
+/** Possible plan values */
+const SHOPIFY_GQL_API_PLANS = {
+  /** Public plan: For global reach (in REST api: `unlimited`) */
+  ADVANCED: {
+    name: 'Advanced',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.ADVANCED],
+  },
+  AGENTIC: {
+    name: 'Agentic',
+    groups: [SHOPIFY_PLAN_GROUP.AI, SHOPIFY_PLAN_GROUP.AVAILABLE],
+  },
+  /** Public plan: For solo entrepreneurs (in REST api: `basic`) */
+  BASIC: {
+    name: 'Basic',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE],
+  },
+  /** In REST api: `partner_test`|`plus_partner_sandbox`|`affiliate`|`staff` */
+  DEVELOPMENT: {
+    name: 'Development',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.FREE, SHOPIFY_PLAN_GROUP.TEST],
+  },
+  /** Public plan: For small teams (in REST api: `professional`) */
+  GROW: {
+    name: 'Grow',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE],
+  },
+  /** In REST api: `cancelled`|`fraudulent`|`frozen`|`grandfather`|`grandfathered` */
+  INACTIVE: {
+    name: 'Inactive',
+    groups: [SHOPIFY_PLAN_GROUP.UNAVAILABLE],
+  },
+  LITE: {
+    name: 'Lite',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE],
+  },
+  /** Custom plan: For unique business needs (in REST api: `custom`) */
+  OTHER: {
+    name: 'Other',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE],
+  },
+  /** In REST api: `dormant` */
+  PAUSED: {
+    name: 'Paused',
+    groups: [SHOPIFY_PLAN_GROUP.UNAVAILABLE],
+  },
+  /** Public plan: For complex businesses (in REST api: `shopify_plus`) */
+  PLUS: {
+    name: 'Plus',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.ADVANCED],
+  },
+  /** Shop in trial when upgrade to `Plus` plan (in REST api: `paid_trial`) */
+  PLUS_TRIAL: {
+    name: 'Plus Trial',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE],
+  },
+  /** In REST api: `retail` */
+  RETAIL: {
+    name: 'Retail',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE],
+  },
+  SHOP_COMPONENT: {
+    name: 'Shop Component',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE],
+  },
+  SHOPIFY_FINANCE: {
+    name: 'Shopify Finance',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.STAFF],
+  },
+  /** Hidden plan. (in REST api: `staff`) */
+  STAFF: {
+    name: 'Staff',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.TEST, SHOPIFY_PLAN_GROUP.STAFF],
+  },
+  /** In REST api: `staff_business` */
+  STAFF_BUSINESS: {
+    name: 'Staff Business',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.TEST, SHOPIFY_PLAN_GROUP.STAFF],
+  },
+  /** In REST api: `starter_2022`|etc. */
+  STARTER: {
+    name: 'Starter',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE],
+  },
+  /** Shop with new charge any plan (In REST api: `trial`) */
+  TRIAL: {
+    name: 'Trial',
+    groups: [SHOPIFY_PLAN_GROUP.AVAILABLE, SHOPIFY_PLAN_GROUP.FREE],
+  },
 } as const
 
 export const SHOPIFY = {
@@ -122,7 +274,8 @@ export const SHOPIFY = {
   },
   PLAN: {
     GROUP: SHOPIFY_PLAN_GROUP,
-    UNIT: SHOPIFY_PLANS,
+    GQL: SHOPIFY_GQL_API_PLANS,
+    REST: SHOPIFY_REST_API_PLANS,
   },
 } as const
 

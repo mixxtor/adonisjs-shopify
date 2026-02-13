@@ -207,6 +207,19 @@ class ShopifyService<
       },
 
       /**
+       * Get the used app by API key or secret.
+       *
+       * This function searches through the list of used Shopify apps to find an app
+       * that matches the provided API key or secret.
+       * @param {string} apiKeyOrSecret - The API key or secret to search for.
+       */
+      getUsedApp(apiKeyOrSecret: string): ShopifyAppCredentials | undefined {
+        return this.getUsedApps().find(
+          (a) => a.api_key === apiKeyOrSecret || a.api_secret === apiKeyOrSecret
+        )
+      },
+
+      /**
        * Verifies the provided signature to detect which app was used.
        *
        * This function checks the provided signature against a list of apps (including the main app),
